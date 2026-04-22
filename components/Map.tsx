@@ -118,7 +118,27 @@ export function MapView() {
     const index = clusterIndexRef.current;
     if (!map || !index) return;
     const zoom = Math.round(map.getZoom());
-    const clusters = index.getClusters([-180, -85, 180, 85], zoom);
+    const b = map.getBounds();
+    const clusters: ReturnType<typeof index.getClusters> = [];
+    if (b) {
+      const west = b.getWest();
+      const east = b.getEast();
+      const south = Math.max(-85, b.getSouth());
+      const north = Math.min(85, b.getNorth());
+      const lngSpan = west <= east ? east - west : 360 - west + east;
+      const padLng = lngSpan * 0.2;
+      const padLat = (north - south) * 0.2;
+      const s = Math.max(-85, south - padLat);
+      const n = Math.min(85, north + padLat);
+      if (west <= east) {
+        const w = Math.max(-180, west - padLng);
+        const e = Math.min(180, east + padLng);
+        clusters.push(...index.getClusters([w, s, e, n], zoom));
+      } else {
+        clusters.push(...index.getClusters([Math.max(-180, west - padLng), s, 180, n], zoom));
+        clusters.push(...index.getClusters([-180, s, Math.min(180, east + padLng), n], zoom));
+      }
+    }
 
     const existing = markersRef.current;
     const seen = new Set<string>();
