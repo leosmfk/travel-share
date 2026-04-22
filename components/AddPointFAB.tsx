@@ -1,21 +1,21 @@
 "use client";
 
-import { useState, type RefObject } from "react";
+import { useRef, useState, type ChangeEvent, type RefObject } from "react";
 import type { Map as MBMap } from "mapbox-gl";
 import exifr from "exifr";
 import type { PointDTO } from "@/lib/types";
-import { CameraCapture } from "./CameraCapture";
 
 type Props = {
   onCreated: (p: PointDTO) => void;
   mapRef: RefObject<MBMap | null>;
 };
 
-type Stage = "idle" | "camera" | "uploading";
+type Stage = "idle" | "uploading";
 
 export function AddPointFAB({ onCreated, mapRef }: Props) {
   const [stage, setStage] = useState<Stage>("idle");
   const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const onCaptured = async (file: File) => {
     setError(null);
@@ -63,11 +63,26 @@ export function AddPointFAB({ onCreated, mapRef }: Props) {
     }
   };
 
+  const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (file) onCaptured(file);
+  };
+
   return (
     <>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onChange={onFileChange}
+        className="hidden"
+        aria-hidden="true"
+      />
       <button
         type="button"
-        onClick={() => setStage("camera")}
+        onClick={() => inputRef.current?.click()}
         disabled={stage === "uploading"}
         className="fixed bottom-6 left-1/2 -translate-x-1/2 z-20 w-16 h-16 rounded-full bg-black text-white text-3xl shadow-xl active:scale-95 transition-transform flex items-center justify-center disabled:opacity-60"
         style={{ bottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
@@ -79,10 +94,6 @@ export function AddPointFAB({ onCreated, mapRef }: Props) {
           "+"
         )}
       </button>
-
-      {stage === "camera" ? (
-        <CameraCapture onCapture={onCaptured} onCancel={() => setStage("idle")} />
-      ) : null}
 
       {error ? (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-30 bg-red-600 text-white text-sm px-4 py-2 rounded-lg shadow-lg">
