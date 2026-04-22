@@ -75,21 +75,25 @@ export function Carousel({ points, initialIndex = 0, onClose }: Props) {
 
   return (
     <AnimatePresence>
-      <motion.div
+      <div
         key="carousel"
         className="fixed inset-0 z-30 flex flex-col items-center justify-center"
         onClick={onClose}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2, ease: EASE }}
-        style={{
-          background:
-            "radial-gradient(120% 80% at 50% 40%, rgba(30,24,30,0.85) 0%, rgba(8,6,10,0.96) 60%, rgba(0,0,0,0.98) 100%)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-        }}
       >
+        <motion.div
+          aria-hidden
+          className="absolute inset-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2, ease: EASE }}
+          style={{
+            background:
+              "radial-gradient(120% 80% at 50% 40%, rgba(30,24,30,0.85) 0%, rgba(8,6,10,0.96) 60%, rgba(0,0,0,0.98) 100%)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+          }}
+        />
         <div
           className="relative"
           style={{
@@ -203,7 +207,7 @@ export function Carousel({ points, initialIndex = 0, onClose }: Props) {
             ×
           </button>
         </motion.div>
-      </motion.div>
+      </div>
     </AnimatePresence>
   );
 }
