@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mapa China
 
-## Getting Started
+Mapa compartilhado para adicionar pontos de interesse durante viagem. Sem login — quem tem a URL adiciona pontos com foto + localização.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Next.js 15 (App Router) + TypeScript + Tailwind 4
+- Mapbox GL JS
+- Neon Postgres + Drizzle ORM
+- Cloudflare R2 (fotos)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Neon**: crie projeto em https://neon.tech, copie `DATABASE_URL`.
+2. **R2**: em https://dash.cloudflare.com → R2 → crie bucket (ex: `map-china`).
+   - Habilite **Public Development URL** no bucket → copie URL (ex: `https://pub-xxx.r2.dev`).
+   - Crie **API Token** com permissão R2 Read+Write → copie `Account ID`, `Access Key ID`, `Secret Access Key`.
+   - **CORS do bucket** — adicione:
+     ```json
+     [
+       {
+         "AllowedOrigins": ["*"],
+         "AllowedMethods": ["PUT", "GET"],
+         "AllowedHeaders": ["*"],
+         "MaxAgeSeconds": 3000
+       }
+     ]
+     ```
+3. Copie `.env.example` para `.env.local` e preencha.
+4. Instale + migre + rode:
+   ```bash
+   npm install
+   npm run db:push
+   npm run dev
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deploy (Vercel)
 
-## Learn More
+- Conecte repo na Vercel
+- Adicione as mesmas env vars
+- Deploy
 
-To learn more about Next.js, take a look at the following resources:
+## Uso
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Abre URL no celular
+- Botão `+` abre câmera → tira foto
+- Sistema lê GPS da foto (EXIF) ou usa geolocation do aparelho
+- Preenche título, descrição, nome → salva
+- Pin aparece no mapa → clicar mostra foto
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Nota China
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Carto tiles normalmente funcionam. OSM pode estar lento/bloqueado. Use VPN se precisar.
